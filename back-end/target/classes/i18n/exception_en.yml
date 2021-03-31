@@ -1,0 +1,12 @@
+# exception_en.yml
+"400":
+  code: "400"
+  msg: "An unknown error has occurred."
+
+"401":
+  code: "401"
+  msg: "un-authorized"
+
+"403":
+  code: "401"
+  msg: "un-authorized"

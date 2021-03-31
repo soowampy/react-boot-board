@@ -1,0 +1,195 @@
+= REST API
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+
+== 0. 카테고리 리스트 [get]
+
+=== 요청 구조
+include::{snippets}/gallery-controller-tests/get-category-list/http-request.adoc[]
+
+=== 응답 구조
+include::{snippets}/gallery-controller-tests/get-category-list/http-response.adoc[]
+
+==== 응답 파라미터들
+include::{snippets}/gallery-controller-tests/get-category-list/response-fields.adoc[]
+
+== 1. 이미지 등록 [post]
+
+=== 요청 파라미터들
+include::{snippets}/gallery-controller-tests/post-gallery/request-parameters.adoc[]
+
+=== 응답 구조
+include::{snippets}/gallery-controller-tests/post-gallery/http-response.adoc[]
+
+==== 응답 파라미터들
+include::{snippets}/gallery-controller-tests/post-gallery/response-fields.adoc[]
+
+
+== 2.1 이미지 조회 - 갤러리 리스트 [get]
+
+=== 요청 구조
+include::{snippets}/gallery-controller-tests/get-gallery-list/http-request.adoc[]
+
+==== 요청 파라미터들
+include::{snippets}/gallery-controller-tests/get-gallery-list/request-parameters.adoc[]
+
+=== 응답 구조
+include::{snippets}/gallery-controller-tests/get-gallery-list/http-response.adoc[]
+
+==== 응답 파라미터들
+include::{snippets}/gallery-controller-tests/get-gallery-list/response-fields.adoc[]
+
+== 2.2 이미지 조회 - 태그 전체 리스트 [get]
+
+=== 요청 구조
+include::{snippets}/gallery-controller-tests/get-tag-list/http-request.adoc[]
+
+=== 응답 구조
+include::{snippets}/gallery-controller-tests/get-tag-list/http-response.adoc[]
+
+==== 응답 파라미터들
+include::{snippets}/gallery-controller-tests/get-tag-list/response-fields.adoc[]
+
+== 2.3 이미지 조회 - 이미지 수 [get]
+
+=== 요청 구조
+include::{snippets}/gallery-controller-tests/get-img-count/http-request.adoc[]
+
+==== 요청 파라미터들
+include::{snippets}/gallery-controller-tests/get-img-count/request-parameters.adoc[]
+
+=== 응답 구조
+include::{snippets}/gallery-controller-tests/get-img-count/http-response.adoc[]
+
+==== 응답 파라미터들
+include::{snippets}/gallery-controller-tests/get-img-count/response-fields.adoc[]
+
+== 3.1 이미지 수정 - 이미지 id 조건에 따른 태그 리스트 [get]
+
+=== 요청 구조
+include::{snippets}/gallery-controller-tests/get-img-tag-list/http-request.adoc[]
+
+=== 응답 구조
+include::{snippets}/gallery-controller-tests/get-img-tag-list/http-response.adoc[]
+
+==== 응답 파라미터들
+include::{snippets}/gallery-controller-tests/get-img-tag-list/response-fields.adoc[]
+
+== 3.2 이미지 수정 - 이미지 정보 수정 [put]
+
+=== 요청 구조
+include::{snippets}/gallery-controller-tests/put-gallery/http-request.adoc[]
+
+==== 요청 파라미터들
+include::{snippets}/gallery-controller-tests/put-gallery/request-parameters.adoc[]
+
+=== 응답 구조
+include::{snippets}/gallery-controller-tests/put-gallery/http-response.adoc[]
+
+==== 응답 파라미터들
+include::{snippets}/gallery-controller-tests/put-gallery/response-fields.adoc[]
+
+== 4. 이미지 정보 삭제 [delete]
+
+=== 요청 구조
+include::{snippets}/gallery-controller-tests/delete-gallery/http-request.adoc[]
+
+=== 응답 구조
+include::{snippets}/gallery-controller-tests/delete-gallery/http-response.adoc[]
+
+==== 응답 파라미터들
+include::{snippets}/gallery-controller-tests/delete-gallery/response-fields.adoc[]
+
+
+== 5.1 회원 입력 [post]
+
+=== 요청 구조
+include::{snippets}/admin-controller-tests/post-member/http-request.adoc[]
+
+==== 요청 파라미터들
+include::{snippets}/admin-controller-tests/post-member/request-parameters.adoc[]
+
+=== 응답 구조
+include::{snippets}/admin-controller-tests/post-member/http-response.adoc[]
+
+==== 응답 파라미터들
+include::{snippets}/admin-controller-tests/post-member/response-fields.adoc[]
+
+== 5.2 회원 정보 수정 [put]
+
+=== 요청 구조
+include::{snippets}/admin-controller-tests/put-member/http-request.adoc[]
+
+==== 요청 파라미터들
+include::{snippets}/admin-controller-tests/put-member/request-parameters.adoc[]
+
+=== 응답 구조
+include::{snippets}/admin-controller-tests/put-member/http-response.adoc[]
+
+==== 응답 파라미터들
+include::{snippets}/admin-controller-tests/put-member/response-fields.adoc[]
+
+== 5.3 회원 정보 삭제 [delete]
+
+=== 요청 구조
+include::{snippets}/admin-controller-tests/delete-member/http-request.adoc[]
+
+=== 응답 구조
+include::{snippets}/admin-controller-tests/delete-member/http-response.adoc[]
+
+==== 응답 파라미터들
+include::{snippets}/admin-controller-tests/delete-member/response-fields.adoc[]
+
+== 6.1 카테고리 입력 [post]
+
+=== 요청 구조
+include::{snippets}/admin-controller-tests/post-cate/http-request.adoc[]
+
+==== 요청 파라미터들
+include::{snippets}/admin-controller-tests/post-cate/request-parameters.adoc[]
+
+=== 응답 구조
+include::{snippets}/admin-controller-tests/post-cate/http-response.adoc[]
+
+==== 응답 파라미터들
+include::{snippets}/admin-controller-tests/post-cate/response-fields.adoc[]
+
+== 6.2 카테고리 순서 수정 [put]
+
+=== 요청 구조
+include::{snippets}/admin-controller-tests/put-cate-seq/http-request.adoc[]
+
+=== 응답 구조
+include::{snippets}/admin-controller-tests/put-cate-seq/http-response.adoc[]
+
+==== 응답 파라미터들
+include::{snippets}/admin-controller-tests/put-cate-seq/response-fields.adoc[]
+
+== 6.3 카테고리 제목 수정 [put]
+
+=== 요청 구조
+include::{snippets}/admin-controller-tests/put-cate-title/http-request.adoc[]
+
+==== 요청 파라미터들
+include::{snippets}/admin-controller-tests/put-cate-title/request-parameters.adoc[]
+
+=== 응답 구조
+include::{snippets}/admin-controller-tests/put-cate-title/http-response.adoc[]
+
+==== 응답 파라미터들
+include::{snippets}/admin-controller-tests/put-cate-title/response-fields.adoc[]
+
+== 6.4 카테고리 삭제 [delete]
+
+=== 요청 구조
+include::{snippets}/admin-controller-tests/delete-category/http-request.adoc[]
+
+=== 응답 구조
+include::{snippets}/admin-controller-tests/delete-category/http-response.adoc[]
+
+==== 응답 파라미터들
+include::{snippets}/admin-controller-tests/delete-category/response-fields.adoc[]

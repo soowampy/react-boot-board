@@ -1,0 +1,168 @@
+@keyframes loading {
+  0% {
+    transform: translateX(0);
+  }
+  50%,
+  100% {
+    transform: translateX(460px);
+  }
+}
+
+.skeleton-item {
+  display: flex;
+  align-items: center;
+  margin: 15px 0;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  position: relative;
+}
+
+.skeleton-img::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 100%;
+  background: linear-gradient(to right, #f2f2f2, #ddd, #f2f2f2);
+  animation: loading 2s infinite linear;
+}
+
+.skeleton-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #f2f2f2;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 10px;
+}
+
+.skeleton-name {
+  width: 70%;
+  height: 18px;
+  background: #f2f2f2;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-name::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 100%;
+  background: linear-gradient(to right, #f2f2f2, #ddd, #f2f2f2);
+  animation: loading 2s infinite linear;
+}
+
+.skeleton-email {
+  width: 85%;
+  height: 18px;
+  background: #f2f2f2;
+  margin-top: 3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-email::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 100%;
+  background: linear-gradient(to right, #f2f2f2, #ddd, #f2f2f2);
+  animation: loading 2s infinite linear;
+}
+
+.container {
+  width: 100%;
+
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 17px;
+}
+
+.wrapper {
+  width: 31%;
+  height: 400px;
+  float: left;
+
+  margin-top: 20px;
+}
+
+.list {
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(#f1f3f5 172px, transparent 0),
+    linear-gradient(#f1f3f5 16px, transparent 0),
+    linear-gradient(#f1f3f5 10px, transparent 0),
+    linear-gradient(#f1f3f5 10px, transparent 0),
+    linear-gradient(#f1f3f5 28px, transparent 0),
+    linear-gradient(#f1f3f5 14px, transparent 0),
+    linear-gradient(#f1f3f5 8px, transparent 0),
+    linear-gradient(#f1f3f5 14px, transparent 0),
+    linear-gradient(#f1f3f5 8px, transparent 0);
+  background-repeat: repeat-y;
+  background-size: 100% 304px, 180px 304px, 90px 304px, 32px 304px, 28px 304px,
+    40px 304px, 56px 304px, 112px 304px, 89px 304px;
+  background-position: 0px 0px, 0px 188px, 0px 214px, 98px 214px, 0px 244px,
+    36px 244px, 36px 264px, 231px 244px, 254px 264px;
+}
+
+.bar {
+  width: 100%;
+  position: absolute;
+  animation-name: skeleton;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in;
+}
+
+.indicator {
+  width: 0;
+  box-shadow: 0 0 75px 75px white;
+}
+
+.bar,
+.indicator {
+  height: 100vh;
+}
+
+@keyframes skeleton {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 0.25;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}

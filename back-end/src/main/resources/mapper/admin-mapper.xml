@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.malgn.board.mapper.admin.AdminMapper">
+
+    <resultMap id="userResultSet" type="com.malgn.board.domain.member.Member">
+        <id property="id" column="M_ID"/>
+        <result property="password" column="M_PWD"/>
+        <result property="name" column="M_NAME"/>
+        <result property="type" column="M_TYPE"/>
+        <result property="email" column="M_EMAIL"/>
+        <result property="regDate" column="M_REGDATE"/>
+        <result property="mNo" column="M_NO"/>
+    </resultMap>
+
+    <resultMap id="cateResultSet" type="com.malgn.board.domain.gallery.Category">
+        <id property="cateId" column="CATE_ID"/>
+        <result property="cateName" column="CATE_NAME"/>
+        <result property="catePId" column="CATE_PID"/>
+        <result property="cateLevel" column="CATE_LEVEL"/>
+        <result property="cateSeq" column="CATE_SEQ"/>
+        <result property="cateCount" column="CATE_COUNT"/>
+    </resultMap>
+
+
+    <insert id="memberInsert" parameterType="com.malgn.board.domain.member.Member">
+    	INSERT INTO member
+    	VALUES(#{id},#{password},#{name},'ROLE_USER',#{email},TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'), SEQ_MEMBER.nextval)
+    </insert>
+
+    <!--id 중복검사-->
+    <select id="idCheck" resultType="int">
+        SELECT COUNT(*)
+        FROM MEMBER
+        WHERE M_ID=#{id} AND (M_TYPE='ROLE_USER' OR M_TYPE='ROLE_ADMIN')
+    </select>
+
+    <!--멤버 리스트-->
+    <select id="memberList" resultMap="userResultSet" parameterType="com.malgn.board.domain.common.SearchVO">
+        SELECT *
+        FROM MEMBER
+        WHERE M_TYPE='ROLE_USER'
+        <if test="searchCondition != null">
+            <if test="searchCondition.equals('id')">
+                AND
+                m_id LIKE '%' || #{searchKeyword} || '%'
+            </if>
+
+            <!--검색 조건이 작성자일 때-->
+            <if test="searchCondition.equals('name')">
+                AND
+                m_name LIKE '%' || #{searchKeyword} || '%'
+            </if>
+        </if>
+        ORDER BY M_REGDATE DESC
+    </select>
+
+    <!--전체 회원 수-->
+    <select id="getMemberCount" resultType="int" parameterType="com.malgn.board.domain.common.SearchVO">
+        SELECT COUNT(*)
+        FROM MEMBER
+        WHERE M_TYPE='ROLE_USER'
+        <if test="searchCondition != null">
+            <if test="searchCondition.equals('id')">
+                AND
+                m_id LIKE '%' || #{searchKeyword} || '%'
+            </if>
+
+            <!--검색 조건이 작성자일 때-->
+            <if test="searchCondition.equals('name')">
+                AND
+                m_name LIKE '%' || #{searchKeyword} || '%'
+            </if>
+        </if>
+    </select>
+
+    <!--id로 멤버 정보 가져오기-->
+    <select id="memberSelect" resultMap="userResultSet">
+        SELECT *
+        FROM member
+        WHERE m_id=#{id}
+    </select>
+
+    <!--회원번호로 멤버 정보 가져오기-->
+    <select id="read" resultMap="userResultSet">
+        SELECT *
+        FROM member
+        WHERE m_no=#{userNo}
+    </select>
+
+    <!--멤버 정보 수정-->
+    <update id="memberUpdate" parameterType="com.malgn.board.domain.member.Member"  >
+        UPDATE MEMBER
+        SET M_PWD=#{password}, M_NAME=#{name}, M_EMAIL=#{email}
+        WHERE M_ID=#{id}
+    </update>
+
+    <!--멤버 정보 삭제-->
+    <delete id="memberDelete">
+        DELETE FROM MEMBER
+        WHERE M_ID=#{id}
+    </delete>
+
+
+    <!--카테고리 정보-->
+    <select id="categoryInfo" resultMap="cateResultSet">
+        SELECT *
+        FROM category
+        WHERE cate_id=#{cateId}
+    </select>
+
+    <!--카테고리 등록-->
+    <insert id="postCate" parameterType="com.malgn.board.domain.gallery.Category">
+        INSERT INTO category
+            VALUES (SEQ_CATE_NO.NEXTVAL,#{cateName},#{catePId},#{cateLevel},NVL((SELECT MAX(cate_seq)
+                                                                        FROM category
+                                                                        WHERE cate_pid=#{catePId})+1,1))
+    </insert>
+
+
+    <update id="cateSeqReset" parameterType="java.util.Map">
+        <foreach collection="list" item="item"  separator=";" open="DECLARE BEGIN" close="; END;" >
+            UPDATE CATEGORY
+            SET CATE_SEQ = 0
+            WHERE CATE_PID = #{item.catePId}
+        </foreach>
+    </update>
+
+
+    <!--카테고리 순서 수정-->
+    <update id="cateUpdate" parameterType="java.util.Map" >
+        <foreach collection="list" item="item"  separator=";" open="DECLARE BEGIN" close="; END;" >
+            UPDATE CATEGORY
+            SET  CATE_PID = #{item.catePId}, CATE_LEVEL = #{item.cateLevel}, CATE_SEQ = NVL((SELECT MAX(cate_seq)
+                                                                                                        FROM category
+                                                                                                        WHERE cate_pid=#{item.catePId})+1,1)
+            WHERE CATE_ID = #{item.cateId}
+        </foreach>
+    </update>
+
+    <!--카테고리 제목 수정-->
+    <update id="cateTitleUpdate" parameterType="com.malgn.board.domain.gallery.Category">
+        UPDATE category
+        SET cate_name=#{cateName}
+        WHERE cate_id=#{cateId}
+    </update>
+
+
+    <!--카테고리 삭제-->
+    <delete id="deleteCategory">
+        DELETE category
+        WHERE cate_id = #{cateId} OR cate_pid = #{cateId}
+    </delete>
+</mapper>

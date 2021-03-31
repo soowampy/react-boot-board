@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Properties>
+        <property name="LOG_DIR" value="/Users/yusuwan/Desktop/log" />
+        <property name="LOG_PATH_NAME" value="${LOG_DIR}" />
+        <property name="FILE_NAME" value="board" />
+        <property name="layoutPattern">[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n</property>
+    </Properties>
+
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${layoutPattern}" />
+        </Console>
+
+        <RollingFile name="file" fileName="${LOG_PATH_NAME}/log/${FILE_NAME}.log" filePattern="${LOG_PATH_NAME}/log/logs/${FILE_NAME}_%d{yyyy-MM-dd}_%i.log">
+            <PatternLayout pattern="${layoutPattern}" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB" /> <!-- 10MB 용량이 초과시 DefaultRolloverStrategy 정책만큼 넘버링 -->
+                <TimeBasedTriggeringPolicy module="true" interval="1" /><!-- 일별 로그 파일 생성-->
+            </Policies>
+            <DefaultRolloverStrategy max="500" fileIndex="min" /><!-- 롤링 파일 500개 까지 생성 -->
+        </RollingFile>
+
+        <RollingFile name="debug" fileName="${LOG_PATH_NAME}/log/${FILE_NAME}-DEBUG.log" filePattern="${LOG_PATH_NAME}/log/logs/${FILE_NAME}-debug_%d{yyyy-MM-dd}_%i.log">
+            <PatternLayout pattern="${layoutPattern}" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB" /> <!-- 10MB 용량이 초과시 DefaultRolloverStrategy 정책만큼 넘버링 -->
+                <TimeBasedTriggeringPolicy module="true" interval="1" /><!-- 일별 로그 파일 생성-->
+            </Policies>
+            <DefaultRolloverStrategy max="500" fileIndex="min" /><!-- 롤링 파일 500개 까지 생성 -->
+        </RollingFile>
+    </Appenders>
+
+
+
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="debug"/>
+            <AppenderRef ref="file"/>
+        </Root>
+
+
+        <logger name="org.springframework.security" level="debug" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="debug"/>
+        </logger>
+
+        <logger name="com.malgn.board" level="debug" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="debug"/>
+        </logger>
+    </Loggers>
+</Configuration>

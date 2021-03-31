@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.malgn.board.mapper.gallery.GalleryMapper">
+
+    <!--카테고리 ResultMap-->
+    <resultMap id="cateResultSet" type="com.malgn.board.domain.gallery.Category">
+        <id property="id" column="CATE_ID"/>
+        <result property="custom" column="CATE_NAME"/>
+        <result property="parentId" column="CATE_PID"/>
+    </resultMap>
+
+    <!--이미지 ResultMap-->
+    <resultMap id="imgResultSet" type="com.malgn.board.domain.gallery.Gallery">
+        <id property="imgId" column="IMG_ID"/>
+        <result property="cateId" column="CATE_ID"/>
+        <result property="mId" column="M_ID"/>
+        <result property="imgTitle" column="IMG_TITLE"/>
+        <result property="imgSrc" column="IMG_SRC"/>
+        <result property="mName" column="IMG_USER"/>
+        <result property="imgDate" column="IMG_DATE"/>
+        <result property="imgUpdate" column="IMG_UPDATE"/>
+        <result property="catePId" column="CATE_PID"/>
+        <result property="imgTSrc" column="IMG_TSRC"/>
+        <result property="cateName" column="CATE_NAME"/>
+        <result property="imgTag" column="IMG_TAG"/>
+
+    </resultMap>
+
+
+    <!-- 태그 ResultMap-->
+    <resultMap id="tagResultSet" type="com.malgn.board.domain.gallery.Tag">
+        <id property="tagId" column="TAG_ID"/>
+        <result property="tagName" column="TAG_NAME"/>
+        <result property="tagCount" column="TAG_COUNT"/>
+    </resultMap>
+
+    <!--board REsultMap-->
+    <resultMap id="boardResultSet" type="com.malgn.board.domain.gallery.Board">
+        <id property="bNo" column="B_NO"/>
+        <result property="title" column="TITLE"/>
+        <result property="mId" column="M_IID"/>
+        <result property="cateId" column="CATE_ID"/>
+        <result property="enrollDate" column="ENROLL_DATE"/>
+        <result property="modifyDate" column="MODIFY_DATE"/>
+        <result property="mName" column="M_NAME"/>
+        <result property="cateName" column="CATE_NAME"/>
+        <result property="bTag" column="BOARD_TAG"/>
+    </resultMap>
+
+    <resultMap id="FilesResultSet" type="com.malgn.board.domain.gallery.Files">
+        <id property="fileNo" column="FILE_NO"/>
+        <result property="bNo" column="B_NO"/>
+        <result property="originName" column="ORIGIN_NAME"/>
+        <result property="changeName" column="CHANGE_NAME"/>
+        <result property="path" column="FILE_PATH"/>
+        <result property="enrollDate" column="ENROLL_DATE"/>
+        <result property="modifyDate" column="MODIFY_DATE"/>
+        <result property="level" column="FILE_LEVEL"/>
+        <result property="info" column="FILE_INFO"/>
+        <result property="size" column="FILE_SIZE"/>
+        <result property="ext" column="FILE_EXT"/>
+        <result property="slice" column="FILE_SLICE"/>
+        <result property="fileKinds" column="FILE_KINDS"/>
+        <result property="realPath" column="REAL_PATH"/>
+        <result property="thumbPath" column="THUMB_PATH"/>
+        <result property="mediaType" column="MEDIA_TYPE"/>
+    </resultMap>
+
+
+
+    <!--IMG 입력-->
+    <insert id="insertFile" parameterType="com.malgn.board.domain.gallery.Gallery" >
+        <!--TAG가 있을 때 TAG 테이블에 IMG_ID를 입력하기 위해 selectKey 사용-->
+        <selectKey keyProperty="imgId" resultType="int" order="BEFORE">
+            select SEQ_IMG.nextval FROM DUAL
+        </selectKey>
+
+        INSERT INTO IMG
+        VALUES(#{imgId}, #{cateId}, #{mId}, #{imgTitle}, #{imgSrc},
+        TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'), TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'), #{imgTSrc})
+    </insert>
+
+    <!--TAG 리스트 입력-->
+    <insert id="insertTag"  parameterType="java.util.Map">
+        INSERT into TAG(TAG_ID,TAG_NAME)
+        SELECT SEQ_TAG.nextval, A.* FROM(
+        <foreach item="item" collection="tagList" separator="UNION ALL">
+            SELECT #{item.tagName,jdbcType=VARCHAR} as TAG_NAME
+            from dual
+        </foreach>) A
+    </insert>
+
+
+    <!--IMG TAG 리스트 입력-->
+    <insert id="insertImgTag"  parameterType="java.util.Map">
+        INSERT into BOARD_TAG(B_NO,TAG_ID)
+        SELECT #{imgId}, A.* FROM(
+        <foreach item="item" collection="tagList" separator="UNION ALL">
+            SELECT #{item.tagId,jdbcType=VARCHAR} as TAG_ID
+            from dual
+        </foreach>) A
+    </insert>
+
+    <!--이미지 수정-->
+    <update id="update"  parameterType="com.malgn.board.domain.gallery.Board" >
+        UPDATE BOARD
+        SET CATE_ID=#{cateId}, TITLE=#{title}, MODIFY_DATE=TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS')
+        WHERE B_NO=#{bNo}
+    </update>
+
+    <!--수정을 위해 태그 지우기-->
+    <delete id="deleteTag" parameterType="int">
+        DELETE FROM BOARD_TAG
+        WHERE B_NO=#{bId}
+    </delete>
+
+    <!-- 삭제-->
+    <delete id="deleteBoard" parameterType="int">
+        DELETE FROM BOARD
+        WHERE B_NO=#{bNo}
+    </delete>
+
+    <delete id="allDeleteById">
+        DELETE FROM IMG
+        WHERE M_ID=#{mId}
+    </delete>
+
+    <delete id="deleteBigFile">
+        DELETE FROM FILES
+        WHERE FILE_NO=#{fileNo}
+    </delete>
+
+
+    <!--태그 중복방지를 위해 태그 이름에 따른 count 수 반환-->
+    <select id="getTagCount" resultType="int">
+        SELECT COUNT(*)
+        FROM TAG
+        WHERE TAG_NAME=#{tagName}
+    </select>
+
+
+    <select id="selectTagList" resultMap="tagResultSet">
+        SELECT t.tag_id, t.tag_name
+        FROM TAG t
+        WHERE t.tag_name IN
+        <foreach collection="tagList" item="item" index="index" separator="," open="(" close=")">
+            #{item.tagName}
+        </foreach>
+    </select>
+
+
+    <!--카테고리 리스트 가져오기-->
+    <select id="getCateList" resultMap="cateResultSet">
+SELECT c.cate_id, c.cate_name,decode(c.cate_pid,0,null,c.cate_pid) as cate_pid, c.cate_level, c.cate_seq,
+               (nvl(
+                     (
+                        select sum(nvl(
+                                       (select count(*)
+                                         from img ii
+                                         where ii.cate_id =cc.cate_id),0))
+                       from category cc
+                       connect by prior cc.cate_id = cc.cate_pid
+                       start with cc.cate_pid = c.cate_id
+                       ),0)+(select count(*)
+                                       from img i
+                                       where i.cate_id =c.cate_id)) cate_count
+        FROM category c
+        START WITH c.cate_pid =0
+        CONNECT BY PRIOR c.cate_id = c.cate_pid
+        ORDER SIBLINGS BY c.cate_seq
+    </select>
+
+
+
+
+    <!-- 태그 리스트 가져오기-->
+    <select id="getTagList" resultMap="tagResultSet">
+        SELECT t.tag_id,t.tag_name,count(*) as tag_count
+        FROM BOARD_TAG it, tag t
+        WHERE it.tag_id = t.tag_id and 1 <![CDATA[ <= ]]> (SELECT count(*)
+                                                           FROM BOARD_TAG it
+                                                            WHERE it.tag_id = t.tag_id)
+        GROUP BY t.tag_id, t.tag_name
+        ORDER BY tag_count desc
+    </select>
+
+    <!-- 이미지 리스트 가져오기-->
+    <select id="getImgList" resultMap="imgResultSet" parameterType="java.util.Map">
+        SELECT i.img_id, i.cate_id, i.m_id, i.img_title, i.img_src, m.m_name as img_user, i.img_date, i.img_update, i.img_tsrc, c.cate_pid, c.cate_name,
+        LISTAGG(t.tag_name, ' #') within group ( order by t.TAG_NAME ) as IMG_TAG
+        FROM img i, CATEGORY c, tag t, img_tag it, member m
+        <where>
+            i.m_id = m.m_id
+            AND i.CATE_ID = c.CATE_ID
+            AND i.img_id = it.img_id(+)
+            AND it.tag_id = t.tag_id(+)
+            <!-- 태그별 -->
+            <if test="searchVO.searchTagId!=null">
+                AND i.IMG_ID IN (SELECT IMG_ID
+                FROM IMG_TAG
+                WHERE TAG_ID= #{searchVO.searchTagId})
+            </if>
+
+            <!-- 태그 리스트별-->
+            <if test="searchVO.searchTagList!=null">
+                AND i.IMG_ID IN(SELECT IMG_ID
+                FROM IMG_TAG
+                WHERE TAG_ID IN
+                <foreach collection="searchVO.searchTagList" item="item" index="index" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+                )
+            </if>
+
+            <!--카테고리별-->
+            <if test="searchVO.searchCateId!=null" >
+                AND
+                (i.cate_id IN (SELECT cc.cate_id
+                FROM category cc
+                START WITH cc.cate_pid = #{searchVO.searchCateId}
+                CONNECT BY PRIOR cc.cate_id = cc.cate_pid) OR i.cate_id=#{searchVO.searchCateId})
+            </if>
+
+            <!-- 검색어별 -->
+            <if test="searchVO.searchCondition!=null">
+                <!--검색 조건이 제목일 때-->
+                <if test="searchVO.searchCondition.equals('title')">
+                    AND
+                    IMG_TITLE LIKE '%' || #{searchVO.searchKeyword} || '%'
+                </if>
+
+                <!--검색 조건이 작성자일 때-->
+                <if test="searchVO.searchCondition.equals('writer')">
+                    AND
+                    m.m_name LIKE '%' || #{searchVO.searchKeyword} || '%'
+                </if>
+
+                <!--검색 조건이 아이디일 때-->
+                <if test="searchVO.searchCondition.equals('id')">
+                    AND
+                    m.m_id LIKE '%' || #{searchVO.searchKeyword} || '%'
+                </if>
+            </if>
+
+            <!--날짜-->
+            <if test="searchVO.strDate!=null" >
+                AND
+                IMG_DATE <![CDATA[ >= ]]> #{searchVO.strDate} AND IMG_DATE <![CDATA[ <= ]]> #{searchVO.endDate}
+            </if>
+        </where>
+        group by i.img_id, i.cate_id, i.m_id, i.img_title, i.img_src, i.img_date, i.img_update, i.img_tsrc, c.cate_pid, c.cate_name,  m.m_name
+        ORDER BY IMG_DATE DESC
+    </select>
+
+
+    <!-- 이미지 리스트 수 가져오기-->
+    <select id="getImgCount" resultType="java.lang.Integer" parameterType="com.malgn.board.domain.common.SearchVO">
+        SELECT COUNT(*)
+        FROM img i, CATEGORY c, member m
+        <where>
+            i.m_id = m.m_id
+            AND i.CATE_ID = c.CATE_ID
+            <if test="searchTagId!=null">
+                AND IMG_ID IN (SELECT IMG_ID
+                FROM IMG_TAG
+                WHERE TAG_ID=#{searchTagId})
+            </if>
+
+            <if test="searchTagList!=null">
+                AND IMG_ID IN(SELECT IMG_ID
+                FROM IMG_TAG
+                WHERE TAG_ID IN
+                <foreach collection="searchTagList" item="item" index="index" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+                )
+            </if>
+
+            <!-- 검색어별 -->
+            <if test="searchCondition!=null">
+                <!--검색 조건이 제목일 때-->
+                <if test="searchCondition.equals('title')">
+                    AND
+                    IMG_TITLE LIKE '%' || #{searchKeyword} || '%'
+                </if>
+
+                <!--검색 조건이 작성자일 때-->
+                <if test="searchCondition.equals('writer')">
+                    AND
+                    m.m_name LIKE '%' || #{searchKeyword} || '%'
+                </if>
+            </if>
+
+            <!--카테고리별-->
+            <if test="searchCateId!=null" >
+                AND
+                (i.cate_id IN (SELECT cc.cate_id
+                FROM category cc
+                START WITH cc.cate_pid = #{searchCateId}
+                CONNECT BY PRIOR cc.cate_id = cc.cate_pid) OR i.cate_id=#{searchCateId})
+            </if>
+
+            <!--날짜-->
+            <if test="strDate!=null" >
+                AND
+                ENROLL_DATE <![CDATA[ >= ]]> #{strDate} AND ENROLL_DATE <![CDATA[ <= ]]> #{endDate}
+            </if>
+
+        </where>
+    </select>
+
+
+    <!--id로이미지정보-->
+    <select id="getGalleryVO" resultMap="imgResultSet">
+        SELECT i.img_id, i.cate_id, i.m_id, i.img_title, i.img_src,m.m_name as img_user, i.img_date, i.img_update, i.img_tsrc,
+        c.CATE_ID, c.CATE_NAME, LISTAGG(t.tag_name, ' #') within group ( order by t.TAG_NAME ) as IMG_TAG
+        FROM img i, CATEGORY c, tag t, img_tag it, member m
+        WHERE i.m_id = m.m_id
+              AND i.CATE_ID = c.CATE_ID
+              AND i.IMG_ID = #{imgId}
+              AND i.IMG_ID = it.img_id(+)
+              AND it.tag_id = t.tag_id(+)
+        group by i.img_id, i.cate_id, i.m_id, i.img_title, i.img_src, i.img_date, i.img_update, i.img_tsrc, c.cate_pid, c.cate_name, c.CATE_ID, m.m_name
+    </select>
+
+
+    <!--id값으로 카테고리 상위 리스트 뽑아오기-->
+    <select id="getGalleryVOCate" resultType="String">
+        SELECT cate_name
+        FROM category c
+        START WITH c.cate_id = #{cateId}
+        CONNECT BY PRIOR  c.cate_pid= c.cate_id
+        ORDER BY c.CATE_LEVEL
+    </select>
+
+    <select id="getImgTagList" resultType="com.malgn.board.domain.gallery.Tag">
+        SELECT t.*
+        FROM TAG t,BOARD_TAG it
+        WHERE t.TAG_ID = it.TAG_ID
+             AND it.B_NO=#{imgId}
+    </select>
+
+
+
+
+    <!-- 현재 시퀀스 ㅏㄱ져오기-->
+    <select id="getBoardCurrentNo" resultType="int">
+        SELECT seq_board_no.currval+1 FROM DUAL
+    </select>
+
+
+    <!--대용량파일첨부-->
+    <insert id="insertBigFile"  parameterType="com.malgn.board.domain.gallery.Files">
+        <selectKey keyProperty="fileNo" resultType="int" order="BEFORE">
+            select SEQ_FILES_NO.nextval FROM DUAL
+        </selectKey>
+        INSERT into FILES
+        VALUES (#{fileNo},#{bNo}, #{originName} ,#{changeName}, #{path}, TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'), TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'),
+        #{level}, #{info}, #{size}, #{ext},#{slice},#{fileKinds},#{realPath},#{mediaType,jdbcType=VARCHAR})
+    </insert>
+
+    <insert id="insertThumbnail"  parameterType="com.malgn.board.domain.gallery.Files">
+            INSERT INTO FILES_THUMB
+            VALUES (SEQ_THUMB_NO.nextval, #{fileNo}, #{thumbPath})
+    </insert>
+
+    <!--글 작-->
+    <insert id="insertBoard"  parameterType="com.malgn.board.domain.gallery.Board">
+        <selectKey keyProperty="bNo" resultType="int" order="BEFORE">
+            select SEQ_BOARD_NO.nextval FROM DUAL
+        </selectKey>
+
+        INSERT into BOARD
+        VALUES (#{bNo},#{title}, #{mId} ,#{cateId},TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'), TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'))
+    </insert>
+
+
+
+
+    <!--보드리스트-->
+    <select id="getBoardList"  parameterType="java.util.Map" resultMap="boardResultSet">
+        SELECT b.b_no, b.title, b.m_iid, b.cate_id, b.ENROLL_DATE, b.MODIFY_DATE, m.M_NAME,c.CATE_NAME,
+        LISTAGG(t.tag_name, ' #') within group ( order by t.TAG_NAME ) as BOARD_TAG
+        FROM  board b , member m, category c, tag t, board_tag bt
+        <where>
+            b.m_iid = m.m_id
+            AND b.cate_id = c.cate_id
+            AND b.b_no = bt.b_no(+)
+            AND bt.tag_id = t.tag_id(+)
+        <!-- 태그별 -->
+        <if test="searchVO.searchTagId!=null">
+            AND b.B_NO IN (SELECT B_NO
+            FROM BOARD_TAG
+            WHERE TAG_ID= #{searchVO.searchTagId})
+        </if>
+
+        <!-- 태그 리스트별-->
+        <if test="searchVO.searchTagList!=null">
+            AND b.B_NO IN(SELECT B_NO
+            FROM BOARD_TAG
+            WHERE TAG_ID IN
+            <foreach collection="searchVO.searchTagList" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+            )
+        </if>
+
+        <!--카테고리별-->
+        <if test="searchVO.searchCateId!=null" >
+            AND
+            (b.cate_id IN (SELECT cc.cate_id
+            FROM category cc
+            START WITH cc.cate_pid = #{searchVO.searchCateId}
+            CONNECT BY PRIOR cc.cate_id = cc.cate_pid) OR b.cate_id=#{searchVO.searchCateId})
+        </if>
+
+        <!--날짜-->
+        <if test="searchVO.strDate!=null" >
+            AND
+            ENROLL_DATE <![CDATA[ >= ]]> #{searchVO.strDate} AND ENROLL_DATE <![CDATA[ <= ]]> #{searchVO.endDate}
+        </if>
+
+            <!-- 검색어별 -->
+            <if test="searchVO.searchCondition!=null">
+                <!--검색 조건이 제목일 때-->
+                <if test="searchVO.searchCondition.equals('title')">
+                    AND
+                    TITLE LIKE '%' || #{searchVO.searchKeyword} || '%'
+                </if>
+
+                <!--검색 조건이 작성자일 때-->
+                <if test="searchVO.searchCondition.equals('writer')">
+                    AND
+                    M_IID LIKE '%' || #{searchVO.searchKeyword} || '%'
+                </if>
+            </if>
+
+        </where>
+        group by b.b_no, b.title, b.m_iid, b.cate_id, b.ENROLL_DATE, b.MODIFY_DATE, c.cate_pid, c.cate_name,  m.m_name
+
+        <if test="searchVO.searchOrder!=null">
+            <if test="searchVO.searchOrder.equals('desc')">
+            order by b_no desc
+            </if>
+
+            <if test="searchVO.searchOrder.equals('asc')">
+                order by b_no asc
+            </if>
+
+            <if test="searchVO.searchOrder.equals('')">
+                order by b_no desc
+            </if>
+        </if>
+    </select>
+
+    <!--detail-->
+    <select id="getBoardDetail"  parameterType="int" resultMap="boardResultSet">
+        SELECT b.b_no, b.title, b.m_iid, b.cate_id, b.ENROLL_DATE, b.MODIFY_DATE, m.M_NAME,c.CATE_NAME
+        ,LISTAGG(t.tag_name, ' #') within group ( order by t.TAG_NAME ) as BOARD_TAG
+        FROM  board b , member m, category c, tag t, board_tag bt
+        WHERE b.m_iid = m.m_id AND b.cate_id = c.cate_id AND b.b_no=#{bNo} AND b.b_no = bt.b_no(+)
+    AND bt.tag_id = t.tag_id(+)
+group by b.b_no, b.title, b.m_iid, b.cate_id, b.ENROLL_DATE, b.MODIFY_DATE, c.cate_pid, c.cate_name,  m.m_name
+    </select>
+
+
+
+    <select id="getBoardDetailFilesList" parameterType="int" resultMap="FilesResultSet">
+        SELECT f.file_no, f.b_no, f.ORIGIN_NAME, f.CHANGE_NAME, f.FILE_PATH,f.ENROLL_DATE, f.MODIFY_DATE, f.FILE_LEVEL, f.FILE_INFO, f.FILE_SIZE, f.FILE_EXT, f.FILE_SLICE, f.FILE_KINDS, f.REAL_PATH, f.MEDIA_TYPE, ft.THUMB_PATH
+        FROM files f, files_thumb ft
+        WHERE f.file_no = ft.FILE_NO(+) AND
+              b_no = #{bNo}
+        ORDER BY f.file_no
+    </select>
+
+
+
+    <!--board count-->
+    <select id="getBoardCount"  parameterType="com.malgn.board.domain.common.SearchVO" resultType="int">
+        SELECT COUNT(*)
+        FROM BOARD b, CATEGORY c
+        <where>
+            b.cate_id = c.cate_id
+        <!--카테고리별-->
+        <if test="searchCateId!=null" >
+            AND
+            (b.cate_id IN (SELECT cc.cate_id
+            FROM category cc
+            START WITH cc.cate_pid = #{searchCateId}
+            CONNECT BY PRIOR cc.cate_id = cc.cate_pid) OR b.cate_id=#{searchCateId})
+        </if>
+
+        <if test="searchTagId!=null">
+            AND B_NO IN (SELECT B_NO
+            FROM BOARD_TAG
+            WHERE TAG_ID=#{searchTagId})
+        </if>
+
+        <if test="searchTagList!=null">
+            AND B_NO IN(SELECT B_NO
+            FROM BOARD_TAG
+            WHERE TAG_ID IN
+            <foreach collection="searchTagList" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+            )
+        </if>
+        <!--날짜-->
+        <if test="strDate!=null" >
+            AND
+            ENROLL_DATE <![CDATA[ >= ]]> #{strDate} AND ENROLL_DATE <![CDATA[ <= ]]> #{endDate}
+        </if>
+
+            <!-- 검색어별 -->
+            <if test="searchCondition!=null">
+                <!--검색 조건이 제목일 때-->
+                <if test="searchCondition.equals('title')">
+                    AND
+                    TITLE LIKE '%' || #{searchKeyword} || '%'
+                </if>
+
+                <!--검색 조건이 작성자일 때-->
+                <if test="searchCondition.equals('writer')">
+                    AND
+                    M_IID LIKE '%' || #{searchKeyword} || '%'
+                </if>
+            </if>
+        </where>
+        order by b_no
+    </select>
+
+    <!--file List -->
+    <select id="getFilesList" resultMap="FilesResultSet">
+        SELECT f.file_no, f.b_no, f.ORIGIN_NAME, f.CHANGE_NAME, f.FILE_PATH,f.ENROLL_DATE, f.MODIFY_DATE, f.FILE_LEVEL, f.FILE_INFO, f.FILE_SIZE, f.FILE_EXT, f.FILE_SLICE, f.FILE_KINDS, f.REAL_PATH, f.MEDIA_TYPE, ft.THUMB_PATH
+        FROM files f, files_thumb ft
+        WHERE f.file_no = ft.FILE_NO(+) AND
+              b_no = #{bNo} AND
+              rownum <![CDATA[ <= ]]> 4
+        ORDER BY f.file_no
+    </select>
+
+    <select id="getDetailFilesList" resultMap="FilesResultSet">
+        SELECT f.file_no, f.b_no, f.ORIGIN_NAME, f.CHANGE_NAME, f.FILE_PATH,f.ENROLL_DATE, f.MODIFY_DATE, f.FILE_LEVEL, f.FILE_INFO, f.FILE_SIZE, f.FILE_EXT, f.FILE_SLICE, f.FILE_KINDS, f.REAL_PATH, f.MEDIA_TYPE, ft.THUMB_PATH
+        FROM files f, files_thumb ft
+        WHERE f.file_no = ft.FILE_NO(+) AND
+              b_no = #{bNo}
+        ORDER BY f.file_no
+    </select>
+
+    <select id="getFilesCount" resultType="int">
+        SELECT COUNT(*)
+        FROM FILES
+        WHERE b_no = #{bNo}
+    </select>
+
+    <select id="getFileInfo" resultMap="FilesResultSet">
+        SELECT *
+        FROM FILES
+        WHERE FILE_NO= #{fileNo}
+    </select>
+
+    <select id="getFileInfoDetail" parameterType="com.malgn.board.domain.gallery.Files" resultMap="FilesResultSet">
+        SELECT *
+        FROM FILES
+        WHERE B_NO = #{bNo} AND FILE_LEVEL=#{level}
+    </select>
+
+
+    <!-- 수정할파일삭제-->
+    <delete id="deleteFiles" parameterType="java.util.ArrayList">
+        DELETE FROM FILES
+        WHERE FILE_NO IN
+        <foreach collection="array" item="item" index="index" separator="," open="(" close=")">
+            ${item}
+        </foreach>
+    </delete>
+</mapper>
